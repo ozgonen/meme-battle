@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { signOutAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
 
-type SearchParamsProps = {
-  searchParams: { message?: string; type?: string };
-};
-
-export default async function ProtectedPage({ searchParams }: SearchParamsProps) {
+// For Next.js 14+, searchParams is a ReadonlyURLSearchParams object
+export default async function ProtectedPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = await createClient();
 
   const {
@@ -49,12 +50,15 @@ export default async function ProtectedPage({ searchParams }: SearchParamsProps)
   const isAdminByEmail = user.email === 'ozownz@gmail.com';
   isAdmin = isAdmin || isAdminByEmail;
   
-  // Get message from query params
-  const message = searchParams?.message ? 
-    { 
-      [searchParams.type === 'error' ? 'error' : 'success']: searchParams.message 
-    } as Message : 
-    null;
+  // Get message from query params - handle as simple object, not promise
+  const messageType = searchParams.type as string | undefined;
+  const messageText = searchParams.message as string | undefined;
+  
+  const message = messageText
+    ? {
+        [messageType === 'error' ? 'error' : 'success']: messageText,
+      } as Message
+    : null;
 
   return (
     <div className="flex-1 w-full flex flex-col gap-12 max-w-4xl mx-auto py-8 px-4">

@@ -78,11 +78,11 @@ async function createBattleAction(formData: FormData) {
   return redirect(`/battles/${data.id}`);
 }
 
-type SearchParamsProps = {
-  searchParams: { message?: string; type?: string };
-};
-
-export default async function CreateBattlePage({ searchParams }: SearchParamsProps) {
+export default async function CreateBattlePage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
   const supabase = await createClient();
   
   // Check if the user is authenticated
@@ -124,12 +124,15 @@ export default async function CreateBattlePage({ searchParams }: SearchParamsPro
     return redirect("/protected?message=You are not authorized to create battles&type=error");
   }
   
-  // Convert searchParams to Message format
-  const message = searchParams?.message ? 
-    { 
-      [searchParams.type === 'error' ? 'error' : 'success']: searchParams.message 
-    } as Message : 
-    null;
+  // Get message from query params
+  const messageType = searchParams.type as string | undefined;
+  const messageText = searchParams.message as string | undefined;
+  
+  const message = messageText
+    ? {
+        [messageType === 'error' ? 'error' : 'success']: messageText,
+      } as Message
+    : null;
   
   return (
     <div className="flex-1 w-full max-w-4xl mx-auto py-8 px-4">
