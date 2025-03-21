@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { signOutAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
 import Link from "next/link";
+import { isUserAdmin } from "@/utils/utils";
 
 // Define the types for search params
 interface SearchParams {
@@ -44,40 +45,8 @@ export default async function ProtectedPage({
     return redirect("/sign-in");
   }
   
-  // Check if user is admin
-  let isAdmin = false;
-  try {
-    // First check if the user_roles table exists
-    const { count, error: countError } = await supabase
-      .from('user_roles')
-      .select('count(*)', { count: 'exact', head: true });
-    
-    if (countError) {
-      console.error("Error checking user_roles table:", countError);
-      console.error("The user_roles table might not exist. Please run the SQL queries from RBAC-MANUAL-SETUP.md");
-    } else {
-      // Table exists, check user's role
-      const { data: userRole, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (!error && userRole) {
-        isAdmin = userRole.role === 'admin';
-      } else {
-        console.error("Error fetching user role:", error);
-      }
-    }
-  } catch (error) {
-    console.error("Error checking admin status:", error);
-  }
-  
-  // Fallback for admin check - if email matches a predefined admin email
-  if (!isAdmin && user.email) {
-    const adminEmails = process.env.ADMIN_EMAILS?.split(',') || [];
-    isAdmin = adminEmails.includes(user.email.toLowerCase());
-  }
+  // Check if user is admin using the reusable function
+  const isAdmin = await isUserAdmin(user.id, user.email);
   
   // Get message from query params - handle as simple object, not promise
   const messageType = searchParams.type as string | undefined;

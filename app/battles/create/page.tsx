@@ -5,6 +5,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { isUserAdmin } from "@/utils/utils";
 
 // Server action to create a new battle
 async function createBattleAction(formData: FormData) {
@@ -19,33 +20,8 @@ async function createBattleAction(formData: FormData) {
     return redirect("/sign-in");
   }
   
-  // Check if user is admin - with error handling
-  let isAdmin = false;
-  try {
-    // First check if the user_roles table exists
-    const { error: tableError } = await supabase
-      .from('user_roles')
-      .select('count(*)', { count: 'exact', head: true });
-    
-    if (!tableError) {
-      // If table exists, check for role
-      const { data: userRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
-        
-      isAdmin = userRole?.role === 'admin';
-    } else {
-      console.error('Error checking user_roles table:', tableError);
-      // Fallback to email check
-      isAdmin = user.email === 'ozownz@gmail.com';
-    }
-  } catch (error) {
-    console.error('Error checking admin status:', error);
-    // Fallback to email check
-    isAdmin = user.email === 'ozownz@gmail.com';
-  }
+  // Check if user is admin
+  const isAdmin = await isUserAdmin(user.id, user.email);
   
   if (!isAdmin) {
     return redirect("/protected?message=You are not authorized to create battles&type=error");
@@ -92,33 +68,8 @@ export default async function CreateBattlePage({
     return redirect("/sign-in");
   }
   
-  // Check if user is admin - with error handling
-  let isAdmin = false;
-  try {
-    // First check if the table exists
-    const { error: tableError } = await supabase
-      .from('user_roles')
-      .select('count(*)', { count: 'exact', head: true });
-    
-    if (!tableError) {
-      // If table exists, check for role
-      const { data: userRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
-        
-      isAdmin = userRole?.role === 'admin';
-    } else {
-      console.error('Error checking user_roles table:', tableError);
-      // Fallback to email check
-      isAdmin = user.email === 'ozownz@gmail.com';
-    }
-  } catch (error) {
-    console.error('Error checking admin status:', error);
-    // Fallback to email check
-    isAdmin = user.email === 'ozownz@gmail.com';
-  }
+  // Check if user is admin using the reusable function
+  const isAdmin = await isUserAdmin(user.id, user.email);
   
   if (!isAdmin) {
     return redirect("/protected?message=You are not authorized to create battles&type=error");
