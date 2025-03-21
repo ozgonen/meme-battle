@@ -27,6 +27,7 @@ A dynamic web application that allows users to create, participate in, and vote 
 - Node.js 18.0.0 or later
 - npm or yarn
 - A Supabase account and project
+- Supabase CLI installed globally (`npm install -g supabase`)
 
 ### Installation
 
@@ -55,26 +56,58 @@ A dynamic web application that allows users to create, participate in, and vote 
    SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
    ```
 
-5. Set up the database schema and policies
+5. Local Development with Supabase
    ```bash
-   # Option 1: Run the migration script (requires service role key)
-   node run-migration.js
+   # Start the local Supabase development environment
+   npm run supabase:start
    
-   # Option 2: Manually execute SQL commands from schema.sql in Supabase SQL Editor
+   # Apply database migrations (creates tables, policies, and triggers)
+   npm run supabase:migration:up
+   
+   # Reset the database (useful during development)
+   npm run supabase:db:reset
    ```
 
-6. Configure Google OAuth in Supabase dashboard:
+6. Deploying Migrations to Production
+   ```bash
+   # Login to Supabase CLI
+   supabase login
+   
+   # Link to your remote project
+   supabase link --project-ref your-project-ref
+   
+   # Push your migrations to production
+   npm run supabase:db:push
+   ```
+
+7. Configure Google OAuth in Supabase dashboard:
    - Navigate to Authentication → Providers → Google
    - Enable Google provider and configure with your Google OAuth credentials
 
-7. Start the development server
+8. Start the development server
    ```bash
    npm run dev
    # or
    yarn dev
    ```
 
-8. Open [http://localhost:3000](http://localhost:3000) in your browser
+9. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Database Migrations
+
+The project uses Supabase migrations to version control database schema changes:
+
+- **Migrations Directory**: `supabase/migrations/` contains SQL migration files
+- **Initial Schema**: The initial schema creates tables for battles, users, participants, submissions, and votes
+- **Creating New Migrations**: Use `npm run supabase:migration:new migration_name` to generate a new migration file
+
+When you need to make database schema changes:
+
+1. Create a new migration: `npm run supabase:migration:new add_new_feature`
+2. Edit the generated migration file in `supabase/migrations/`
+3. Apply the migration locally: `npm run supabase:migration:up`
+4. Test your changes locally
+5. Push to production: `npm run supabase:db:push`
 
 ## Role-Based Access Control (RBAC)
 
@@ -86,7 +119,7 @@ The application uses a simple RBAC system:
    - Control battle status (collecting → voting → completed)
    - View all battles and submissions
 
-To add additional admins, follow the instructions in `RBAC-MANUAL-SETUP.md`.
+The RBAC system is implemented through database policies and the `user_roles` table.
 
 ## Project Structure
 
@@ -99,10 +132,12 @@ with-supabase-app/
 │   │   └── create/        # Battle creation page
 │   └── protected/         # Protected profile page
 ├── components/            # Reusable UI components
+├── supabase/              # Supabase configuration
+│   ├── migrations/        # Database migration files
+│   └── config.toml        # Supabase project configuration
 ├── utils/                 # Utility functions
 │   └── supabase/          # Supabase client configuration
-├── schema.sql             # Database schema definition
-└── RBAC-MANUAL-SETUP.md   # Instructions for RBAC setup
+└── schema.sql             # Legacy schema definition (for reference)
 ```
 
 ## Battle Lifecycle

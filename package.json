@@ -7,7 +7,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "migration": "node run-migration.js"
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:migration:new": "supabase migration new",
+    "supabase:migration:up": "supabase migration up",
+    "supabase:db:reset": "supabase db reset",
+    "supabase:db:push": "supabase db push",
+    "supabase:functions:serve": "supabase functions serve"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.0.3",
