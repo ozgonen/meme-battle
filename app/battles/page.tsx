@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { isUserAdmin } from "@/utils/utils";
 
 export default async function BattlesPage({
   searchParams,
@@ -16,6 +17,9 @@ export default async function BattlesPage({
   if (!user) {
     return redirect("/sign-in");
   }
+  
+  // Check if user is admin
+  const isAdmin = await isUserAdmin(user.id, user.email);
   
   // Handle optional status filter
   const statusFilter = searchParams.status;
@@ -53,11 +57,20 @@ export default async function BattlesPage({
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-extrabold text-white">Meme Battles</h1>
-          <Link href="/protected">
-            <Button variant="outline" className="border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white">
-              Back to Profile
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/protected">
+              <Button variant="outline" className="border-pink-500 text-pink-500 hover:bg-pink-500 hover:text-white">
+                Back to Profile
+              </Button>
+            </Link>
+            {isAdmin && (
+              <Link href="/battles/create">
+                <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+                  Create a Battle
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
         
         {/* Status filter tabs */}
@@ -140,13 +153,15 @@ export default async function BattlesPage({
             <p className="text-gray-400 mb-6">
               {statusFilter 
                 ? `There are no battles with ${statusFilter} status yet.`
-                : "There are no battles yet. Create one to get started!"}
+                : "There are no battles yet."}
             </p>
-            <Link href="/battles/create">
-              <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
-                Create a Battle
-              </Button>
-            </Link>
+            {isAdmin && (
+              <Link href="/battles/create">
+                <Button className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700">
+                  Create a Battle
+                </Button>
+              </Link>
+            )}
           </div>
         )}
       </div>
