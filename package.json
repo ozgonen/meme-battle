@@ -1,4 +1,7 @@
 {
+  "name": "meme-battle",
+  "version": "1.0.0",
+  "description": "A dynamic web application for creating and participating in meme battles",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -35,5 +38,7 @@
     "tailwindcss": "3.4.17",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.7.2"
-  }
+  },
+  "author": "",
+  "license": "MIT"
 }
